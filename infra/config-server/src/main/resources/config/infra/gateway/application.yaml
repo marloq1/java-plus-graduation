@@ -21,8 +21,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: gateway
   endpoint:
+    gateway:
+      enabled: true
     health:
       show-details: always
 logging:
