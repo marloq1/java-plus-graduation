@@ -1,39 +1,12 @@
 spring:
   cloud:
     gateway:
+      discovery.locator.enabled: true
       routes:
         - id: main_service_route
           uri: lb://main-service
-
           predicates:
             - Path=/**
-          filters:
-            - name: Retry
-              args:
-                retries: 3
-                statuses: NOT_FOUND
-                methods: GET,POST,PUT,DELETE
 
 server:
   port: 8080
-management:
-  endpoints:
-    web:
-      exposure:
-        include: gateway
-  endpoint:
-    gateway:
-      enabled: true
-    health:
-      show-details: always
-logging:
-  level:
-    root: INFO
-
-    org.springframework.cloud.gateway: TRACE
-
-    reactor.netty.http.client: TRACE
-
-    reactor.netty.http.server: DEBUG
-
-    org.springframework.cloud.gateway.route.RouteDefinitionLocator: TRACE
