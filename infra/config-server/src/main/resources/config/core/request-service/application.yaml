@@ -1,9 +1,7 @@
-server:
-  port: 0
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/stats_server
+    url: jdbc:postgresql://localhost:5432/request_service
     username: dbuser
     password: 12345
 
@@ -20,3 +18,5 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
+server:
+  port: 0

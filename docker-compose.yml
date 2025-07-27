@@ -1,4 +1,4 @@
-services:
+#services:
 #  stats-server:
 #    build: stats/stats-server
 #    image: stats-server
@@ -20,26 +20,26 @@ services:
 #    networks:
 #      - app-network
 
-  stats-db:
-    image: postgres:16.1
-    container_name: postgresStats
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_PASSWORD=12345
-      - POSTGRES_USER=dbuser
-      - POSTGRES_DB=statsDb
-      - TZ=Europe/Moscow
-    healthcheck:
-      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
-      timeout: 5s
-      interval: 5s
-      retries: 10
-    networks:
-      - app-network
+#  stats-db:
+#    image: postgres:16.1
+#    container_name: postgresStats
+#    ports:
+#      - "5432:5432"
+#    environment:
+#      - POSTGRES_PASSWORD=12345
+#      - POSTGRES_USER=dbuser
+#      - POSTGRES_DB=statsDb
+#      - TZ=Europe/Moscow
+#    healthcheck:
+#      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+#      timeout: 5s
+#      interval: 5s
+#      retries: 10
+#    networks:
+#      - app-network
 
 #  ewm-service:
-#    build: main-service
+#    build: event-service
 #    image: ewm-service
 #    container_name: ewm-service
 #    ports:
@@ -59,23 +59,42 @@ services:
 #    networks:
 #      - app-network
 
-  ewm-db:
+#  ewm-db:
+#    image: postgres:16.1
+#    container_name: postgresMain
+#    ports:
+#      - "6432:5432"
+#    environment:
+#      - POSTGRES_PASSWORD=12345
+#      - POSTGRES_USER=dbuser
+#      - POSTGRES_DB=mainDb
+#      - TZ=Europe/Moscow
+#    healthcheck:
+#      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+#      timeout: 5s
+#      interval: 5s
+#      retries: 10
+#    networks:
+#      - app-network
+
+services:
+  db:
     image: postgres:16.1
-    container_name: postgresMain
+    container_name: postgres
     ports:
-      - "6432:5432"
+      - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=12345
       - POSTGRES_USER=dbuser
-      - POSTGRES_DB=mainDb
+      - POSTGRES_DB=explore
       - TZ=Europe/Moscow
+    volumes:
+      - ./init-db:/docker-entrypoint-initdb.d
     healthcheck:
       test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
       timeout: 5s
       interval: 5s
       retries: 10
-    networks:
-      - app-network
 
 networks:
   app-network:
