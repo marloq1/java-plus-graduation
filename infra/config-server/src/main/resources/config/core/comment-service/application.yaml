@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/comment_service
+    url: jdbc:postgresql://${COMMENT_DB_HOSTNAME:localhost}:5432/commentDb
     username: dbuser
     password: 12345
 

@@ -10,7 +10,7 @@ import ru.practicum.dto.UserDto;
 
 import java.util.List;
 
-@FeignClient(name = "user-service", path = "/admin/users")
+@FeignClient(name = "user-service", path = "/admin/users", fallback = UserClientFallBack.class)
 public interface UserClient {
 
     @GetMapping("/{userId}")

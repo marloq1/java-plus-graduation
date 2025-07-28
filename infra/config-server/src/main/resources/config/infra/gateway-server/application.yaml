@@ -20,10 +20,18 @@ spring:
           predicates:
             - Path=/admin/events/**
 
-        - id: event_public_route
+        - id: event_public_1_route
           uri: lb://event-service
           predicates:
-            - Path=/events/**
+            - Path=/events/{id}
+        - id: event_public_2_route
+          uri: lb://event-service
+          predicates:
+            - Path=/events/internal/**
+        - id: event_public_3_route
+          uri: lb://event-service
+          predicates:
+            - Path=/events
 
         - id: event_private_1_route
           uri: lb://event-service
