@@ -15,12 +15,14 @@ public class ErrorHandler {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFound(final NotFoundException e) {
+        log.warn("Ошибка 404, объект не найден");
         return new ErrorResponse("NOT_FOUND", "The required object was not found.", e.getMessage());
     }
 
     @ExceptionHandler({DataIntegrityViolationException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleConflict(RuntimeException e) {
+        log.warn("Ошибка 409, конфликт");
         return new ErrorResponse("CONFLICT", "Integrity constraint has been violated.", e.getMessage());
     }
 
