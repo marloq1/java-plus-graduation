@@ -1,4 +1,41 @@
 services:
+  kafka:
+    image: confluentinc/confluent-local:7.4.3
+    hostname: kafka
+    container_name: kafka
+    ports:
+      - "9092:9092" # for client connections
+      - "9101:9101" # JMX
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      CLUSTER_ID: 'K0EA9p0yEe6MkAAAAkKsEg'
+    healthcheck:
+      test: [ "CMD-SHELL", "exit 0" ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  kafka-init-topics:
+    image: confluentinc/confluent-local:7.4.3
+    container_name: kafka-init-topics
+    depends_on:
+      - kafka
+    command: "bash -c \
+                'kafka-topics --create --topic stats.user-actions.v1 \
+                             --partitions 1 --replication-factor 1 --if-not-exists \
+                             --bootstrap-server kafka:29092 && \
+                kafka-topics --create --topic stats.events-similarity.v1 \
+                             --partitions 1 --replication-factor 1 --if-not-exists \
+                             --bootstrap-server kafka:29092'"
+    init: true
+
   discovery-server:
     build: infra/discovery-server
     container_name: discovery-server
@@ -29,50 +66,12 @@ services:
       - EVENT_DB_HOSTNAME = event-db
       - REQUEST_DB_HOSTNAME = request-db
       - COMMENT_DB_HOSTNAME = comment-db
+      - ANALYZER_DB_HOSTNAME = analyzer-db
     healthcheck:
       test: [ "CMD-SHELL", "exit 0" ]
       interval: 20s
       timeout: 5s
       retries: 5
-
-
-  stats-server:
-    build: stats/stats-server
-    container_name: stats-server
-    depends_on:
-      stats-db:
-        condition: service_healthy
-      config-server:
-        condition: service_healthy
-    networks:
-      - ewm-net
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/statsDb
-      - SPRING_DATASOURCE_USERNAME=dbuser
-      - SPRING_DATASOURCE_PASSWORD=12345
-      - SERVER_PORT=0
-      - EUREKA_STATS_HOSTNAME = stats-server
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
-    healthcheck:
-      test: [ "CMD-SHELL", "exit 0" ]
-      timeout: 5s
-      interval: 15s
-      retries: 10
-
-  stats-db:
-    image: postgres:16.1
-    container_name: postgres-stats-db
-    environment:
-      - POSTGRES_PASSWORD=12345
-      - POSTGRES_USER=dbuser
-      - POSTGRES_DB=statsDb
-    networks:
-      - ewm-net
-    healthcheck:
-      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
-      timeout: 5s
-      interval: 10s
-      retries: 15
 
   user-service:
     build: core/user-service
@@ -81,8 +80,6 @@ services:
       user-db:
         condition: service_healthy
       config-server:
-        condition: service_healthy
-      stats-server:
         condition: service_healthy
     networks:
       - ewm-net
@@ -120,8 +117,6 @@ services:
     container_name: event-service
     depends_on:
       config-server:
-        condition: service_healthy
-      stats-server:
         condition: service_healthy
       user-service:
         condition: service_healthy
@@ -161,8 +156,6 @@ services:
     container_name: request-service
     depends_on:
       config-server:
-        condition: service_healthy
-      stats-server:
         condition: service_healthy
       user-service:
         condition: service_healthy
@@ -240,6 +233,87 @@ services:
       interval: 10s
       retries: 15
 
+  collector:
+    build: stats/collector
+    container_name: collector
+    depends_on:
+      kafka:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    networks:
+      - ewm-net
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    healthcheck:
+      test: [ "CMD-SHELL", "exit 0" ]
+      timeout: 5s
+      interval: 25s
+      retries: 10
+
+  aggregator:
+    build: stats/aggregator
+    container_name: aggregator
+    depends_on:
+      kafka:
+        condition: service_healthy
+      collector:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    networks:
+      - ewm-net
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    healthcheck:
+      test: [ "CMD-SHELL", "exit 0" ]
+      timeout: 5s
+      interval: 25s
+      retries: 10
+
+  analyzer:
+    build: stats/analyzer
+    container_name: analyzer
+    depends_on:
+      kafka:
+        condition: service_healthy
+      collector:
+        condition: service_healthy
+      aggregator:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      analyzer-db:
+        condition: service_healthy
+    networks:
+      - ewm-net
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://analyzer-db:5432/analyzerDb
+      - SPRING_DATASOURCE_USERNAME=dbuser
+      - SPRING_DATASOURCE_PASSWORD=12345
+      - EUREKA_ANALYZER_HOSTNAME = analyzer
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    healthcheck:
+      test: [ "CMD-SHELL", "exit 0" ]
+      timeout: 5s
+      interval: 25s
+      retries: 10
+
+  analyzer-db:
+    image: postgres:16.1
+    container_name: postgres-analyzer-db
+    networks:
+      - ewm-net
+    environment:
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_USER=dbuser
+      - POSTGRES_DB=analyzerDb
+      - TZ=Europe/Moscow
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
 
   gateway-server:
     build: infra/gateway-server
@@ -256,8 +330,6 @@ services:
       request-service:
         condition: service_healthy
       event-service:
-        condition: service_healthy
-      stats-server:
         condition: service_healthy
     networks:
       - ewm-net

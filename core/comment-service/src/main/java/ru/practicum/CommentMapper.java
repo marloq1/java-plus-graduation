@@ -1,8 +1,9 @@
 package ru.practicum;
 
-import org.mapstruct.Mapper;
+
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.Mapper;
 import ru.practicum.dto.CommentCreateDto;
 import ru.practicum.dto.CommentDto;
 

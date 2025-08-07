@@ -1,5 +1,6 @@
 package ru.practicum;
 
+import ewm.src.main.java.ru.practicum.CollectorClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,11 +30,11 @@ public class RequestServiceImpl implements RequestService {
     RequestMapper requestMapper;
     UserClient userClient;
     EventClient eventClient;
+    CollectorClient collectorClient;
 
     @Override
     public List<ParticipationRequestDto> findRequestsByUserId(Long userId) {
-        userClient.getUser(userId)
-        ;
+        userClient.getUser(userId);
         return logAndReturn(
                 requestMapper.toDtoList(requestRepository.findByRequesterId(userId)),
                 requests -> log.info("Found {} requests for user with id={}",
@@ -70,6 +71,8 @@ public class RequestServiceImpl implements RequestService {
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
             eventClient.changeEventFields(event);
         }
+
+        collectorClient.collectUserAction(userId,eventId,"ACTION_REGISTER");
 
         return dto;
     }

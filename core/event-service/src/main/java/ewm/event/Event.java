@@ -58,7 +58,7 @@ public class Event {
     State state;
 
     @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
-    Long views;
+    Double rating;
 
     @JoinColumn(name = "initiator_id", nullable = false)
     @ToString.Exclude

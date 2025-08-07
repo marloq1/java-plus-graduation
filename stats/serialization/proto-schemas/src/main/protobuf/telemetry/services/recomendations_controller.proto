@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "telemetry/messages/request.proto";
+
+option java_multiple_files = true;
+option java_package = "stats.service.analyzer";
+option java_outer_classname = "AnalyzerControllerOuterClass";
+package stats.service.dashboard;
+
+service RecommendationsController {
+  rpc GetRecommendationsForUser (telemetry.message.request.UserPredictionsRequestProto)
+      returns (stream telemetry.message.request.RecommendedEventProto);
+  rpc GetSimilarEvents (telemetry.message.request.SimilarEventsRequestProto)
+      returns (stream telemetry.message.request.RecommendedEventProto);
+
+  rpc GetInteractionsCount (telemetry.message.request.InteractionsCountRequestProto)
+      returns (stream telemetry.message.request.RecommendedEventProto);
+}

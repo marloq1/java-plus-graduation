@@ -32,6 +32,14 @@ spring:
           uri: lb://event-service
           predicates:
             - Path=/events
+        - id: event_public_4_route
+          uri: lb://event-service
+          predicates:
+            - Path=/events/recommendations
+        - id: event_public_5_route
+          uri: lb://event-service
+          predicates:
+            - Path=/events/{eventId}/like
 
         - id: event_private_1_route
           uri: lb://event-service

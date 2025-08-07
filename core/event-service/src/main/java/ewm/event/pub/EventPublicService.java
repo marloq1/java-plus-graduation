@@ -12,10 +12,14 @@ public interface EventPublicService {
                                   String rangeEnd, Boolean onlyAvailable, String sort, Integer from,
                                   Integer size, HttpServletRequest request);
 
-    EventFullDto getEventById(Long id, HttpServletRequest request);
+    EventFullDto getEventById(Long userId, Long id, HttpServletRequest request);
 
     void changeEventFields(EventFullDto eventFullDto);
 
 
     EventFullDto getEventByIdInternal(Long id);
+
+    List<EventShortDto> getRecommendations(Long userId,int maxResult);
+
+    void putLike(long userId, long eventId);
 }

@@ -82,7 +82,7 @@ public class EventServiceImpl implements EventService {
         event.setCreatedOn(LocalDateTime.now());
         event.setState(State.PENDING);
         event.setConfirmedRequests(0L);
-        event.setViews(0L);
+        event.setRating(0D);
         return logAndReturn(eventMapper.toFullDto(eventRepository.save(event),UserShortDto.builder()
                         .id(userDto.getId())
                         .name(userDto.getName()).build()),
