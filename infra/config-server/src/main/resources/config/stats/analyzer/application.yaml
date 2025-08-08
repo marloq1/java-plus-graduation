@@ -1,9 +1,9 @@
-kafka.bootstrap-servers:
-  localhost:9092
+kafka:
+  bootstrap-servers: "localhost:9092"
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://{ANALYZER_DB_HOSTNAME:localhost}:5432/analyzerDb
+    url: jdbc:postgresql://${ANALYZER_DB_HOSTNAME:localhost}:5432/analyzerDb
     username: dbuser
     password: 12345
 

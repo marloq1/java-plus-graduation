@@ -7,6 +7,8 @@ services:
       - "9092:9092" # for client connections
       - "9101:9101" # JMX
     restart: unless-stopped
+    networks:
+      - ewm-net
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
@@ -244,6 +246,7 @@ services:
     networks:
       - ewm-net
     environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
     healthcheck:
       test: [ "CMD-SHELL", "exit 0" ]
@@ -264,6 +267,7 @@ services:
     networks:
       - ewm-net
     environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
     healthcheck:
       test: [ "CMD-SHELL", "exit 0" ]
@@ -288,6 +292,7 @@ services:
     networks:
       - ewm-net
     environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - SPRING_DATASOURCE_URL=jdbc:postgresql://analyzer-db:5432/analyzerDb
       - SPRING_DATASOURCE_USERNAME=dbuser
       - SPRING_DATASOURCE_PASSWORD=12345
