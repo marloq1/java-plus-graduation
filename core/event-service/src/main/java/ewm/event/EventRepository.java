@@ -17,6 +17,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     Event findByInitiatorId(Long userId);
 
+    List<Event> findByIdIn(List<Long> eventIds);
+
 
     @EntityGraph(attributePaths = {"category"})
     @Query("SELECT e FROM Event e " +

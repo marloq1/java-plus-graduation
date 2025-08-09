@@ -38,7 +38,7 @@ public interface EventMapper {
     @Mapping(target = "createdOn", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
     @Mapping(target = "state", ignore = true)
-    @Mapping(target = "views", ignore = true)
+    @Mapping(target = "rating", ignore = true)
     @Mapping(target = "eventDate", source = "eventDate", qualifiedByName = "stringToLocalDateTime")
     Event toEvent(NewEventDto newEventDto);
 

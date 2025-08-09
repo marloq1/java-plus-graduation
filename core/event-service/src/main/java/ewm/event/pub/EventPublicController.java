@@ -38,8 +38,9 @@ public class EventPublicController {
     }
 
     @GetMapping("/{id}")
-    public EventFullDto getEventById(@PathVariable Long id, HttpServletRequest request) {
-        return eventPublicService.getEventById(id,request);
+    public EventFullDto getEventById(@RequestHeader("X-EWM-USER-ID") long userId,
+                                     @PathVariable Long id, HttpServletRequest request) {
+        return eventPublicService.getEventById(userId,id,request);
     }
 
     @GetMapping("/internal/{id}")
@@ -52,6 +53,16 @@ public class EventPublicController {
         eventPublicService.changeEventFields(eventFullDto);
     }
 
+    @GetMapping("/recommendations")
+    public List<EventShortDto> getRecommendations(@RequestHeader("X-EWM-USER-ID") long userId,
+                                                  @RequestParam(defaultValue = "10") int maxResults) {
+        return eventPublicService.getRecommendations(userId,maxResults);
+    }
+
+    @PutMapping("/{eventId}/like")
+    public void putLike(@RequestHeader("X-EWM-USER-ID") long userId, @PathVariable long eventId) {
+
+    }
 
 
 
